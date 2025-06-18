@@ -86,6 +86,9 @@
 
 
 
+
+
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -107,7 +110,7 @@
   <button onclick="getLocation()">Voir la position</button>
 
   <div id="result"></div>
-  <a id="googleLink" href="#" target="_blank" style="display:none;">Ouvrir dans Google Maps</a>
+  <a id="googleLink" href="#" target="_blank" style="display:none;">Voir sur Google Maps (avec pointeur)</a>
   <div id="map"></div>
 
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
@@ -135,11 +138,10 @@
             Heure : ${data.heure}
           `;
 
-          // Affiche lien Google Maps
-          linkEl.href = `https://www.google.com/maps/@${lat},${lon},20z`;
+          // Lien Google Maps avec pointeur rouge (navigation/direction style)
+          linkEl.href = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}`;
           linkEl.style.display = 'inline-block';
 
-          // Affiche sur Leaflet
           if (!map) {
             map = L.map('map').setView([lat, lon], 18);
             L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
