@@ -78,25 +78,21 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Localisation Antivol</title>
+  <title>Suivi de position en direct</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       text-align: center;
       padding: 20px;
     }
-    #map {
-      height: 400px;
-      width: 100%;
-      margin-top: 20px;
-    }
     input {
       padding: 8px;
-      width: 250px;
+      width: 300px;
     }
     button {
       padding: 8px 15px;
@@ -106,13 +102,13 @@
       margin-top: 20px;
       font-size: 18px;
     }
+    #map {
+      width: 100%;
+      height: 400px;
+      margin-top: 20px;
+      display: none;
+    }
   </style>
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
-    integrity="sha512-sA+z0pK7mxq5B1VqpvRMid9ajd5Am5aQ5xj5pO2xgDr/fyW+7OKAq/XINZoO4AsAY8Kfuz0a1R0ZsUeoxbKsUg=="
-    crossorigin=""
-  />
 </head>
 <body>
   <h1>Suivi de position en direct</h1>
@@ -122,18 +118,16 @@
   <div id="result"></div>
   <div id="map"></div>
 
-  <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"
-    integrity="sha512-bYKnZ1i9Q+aj9FdcP+2w4RQnQ5WDDprQwkaDdB1n4J2L6Vq1xkUN5OEPL2nvCGeWrQq3b+0jx8ygfFJjUB6Zow=="
-    crossorigin=""></script>
+  <!-- Script Google Maps -->
+  <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY"></script>
 
   <script>
-    let map;
-    let marker;
-
     async function getLocation() {
       const email = document.getElementById('emailInput').value;
       const resultDiv = document.getElementById('result');
+      const mapDiv = document.getElementById('map');
       resultDiv.innerHTML = 'Chargement...';
+      mapDiv.style.display = 'none';
 
       try {
         const response = await fetch(`/location/${encodeURIComponent(email)}`);
@@ -146,24 +140,26 @@
             Heure : ${data.heure}
           `;
 
-          if (!map) {
-            map = L.map('map').setView([data.latitude, data.longitude], 20);
+          // Affichage carte
+          mapDiv.style.display = 'block';
+          const location = { lat: parseFloat(data.latitude), lng: parseFloat(data.longitude) };
 
-            L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', {
-              maxZoom: 25,
-              minZoom: 1,
-              subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
-              attribution: '© Google Maps'
-            }).addTo(map);
+          const map = new google.maps.Map(mapDiv, {
+            zoom: 20,
+            center: location,
+            mapTypeId: 'satellite'
+          });
 
-            marker = L.marker([data.latitude, data.longitude]).addTo(map);
-          } else {
-            map.setView([data.latitude, data.longitude], 20);
-            marker.setLatLng([data.latitude, data.longitude]);
-          }
+          new google.maps.Marker({
+            position: location,
+            map: map,
+            title: "Dernière position"
+          });
+
         } else {
           resultDiv.innerHTML = data.error || 'Aucune donnée trouvée.';
         }
+
       } catch (error) {
         resultDiv.innerHTML = 'Erreur lors de la récupération.';
       }
