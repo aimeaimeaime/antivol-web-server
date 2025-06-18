@@ -1,0 +1,43 @@
+
+// Fichier: public/index.html
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Système Antivol Web</title>
+  <style>
+    body { font-family: Arial; text-align: center; margin-top: 50px; }
+    input { padding: 10px; width: 300px; }
+    button { padding: 10px; }
+    .result { margin-top: 30px; font-size: 18px; }
+  </style>
+</head>
+<body>
+  <h2>Localisation de l'utilisateur</h2>
+  <input type="text" id="email" placeholder="Entrez l'adresse email" />
+  <button onclick="fetchLocation()">Voir la position</button>
+  <div class="result" id="result"></div>
+
+  <script>
+    function fetchLocation() {
+      const email = document.getElementById("email").value.trim();
+      if (!email) return alert("Veuillez entrer un email");
+
+      fetch(`/location?email=${encodeURIComponent(email)}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.error) {
+            document.getElementById("result").innerText = data.error;
+          } else {
+            document.getElementById("result").innerHTML =
+              `Latitude: ${data.latitude}<br>Longitude: ${data.longitude}<br>Heure: ${data.heure}`;
+          }
+        })
+        .catch(err => {
+          document.getElementById("result").innerText = "Erreur de connexion";
+        });
+    }
+  </script>
+</body>
+</html>
