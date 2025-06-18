@@ -81,6 +81,11 @@
 
 
 
+
+
+
+
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -93,6 +98,7 @@
     button { padding: 8px 15px; margin-left: 10px; }
     #result { margin-top: 20px; font-size: 16px; }
     #map { height: 400px; margin-top: 20px; }
+    #googleLink { margin-top: 15px; display: block; font-size: 16px; color: blue; text-decoration: underline; }
   </style>
 </head>
 <body>
@@ -101,6 +107,7 @@
   <button onclick="getLocation()">Voir la position</button>
 
   <div id="result"></div>
+  <a id="googleLink" href="#" target="_blank" style="display:none;">Ouvrir dans Google Maps</a>
   <div id="map"></div>
 
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
@@ -110,24 +117,31 @@
     async function getLocation() {
       const email = document.getElementById('emailInput').value;
       const resultDiv = document.getElementById('result');
+      const linkEl = document.getElementById('googleLink');
       resultDiv.innerHTML = 'Chargement...';
+      linkEl.style.display = 'none';
 
       try {
         const response = await fetch(`/location/${encodeURIComponent(email)}`);
         const data = await response.json();
 
         if (data.latitude && data.longitude) {
-          resultDiv.innerHTML = `
-            Latitude : ${data.latitude}<br>
-            Longitude : ${data.longitude}<br>
-            Heure : ${data.heure}
-          `;
-
           const lat = parseFloat(data.latitude);
           const lon = parseFloat(data.longitude);
 
+          resultDiv.innerHTML = `
+            Latitude : ${lat}<br>
+            Longitude : ${lon}<br>
+            Heure : ${data.heure}
+          `;
+
+          // Affiche lien Google Maps
+          linkEl.href = `https://www.google.com/maps/@${lat},${lon},20z`;
+          linkEl.style.display = 'inline-block';
+
+          // Affiche sur Leaflet
           if (!map) {
-            map = L.map('map').setView([lat, lon], 18); // Zoom 18 = très proche
+            map = L.map('map').setView([lat, lon], 18);
             L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
               maxZoom: 22,
               attribution: '&copy; OpenStreetMap contributors'
