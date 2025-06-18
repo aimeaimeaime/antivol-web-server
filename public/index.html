@@ -1,4 +1,7 @@
-<!-- <!DOCTYPE html>
+
+
+<!-- 
+<!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
@@ -8,7 +11,9 @@
     input { padding: 8px; width: 250px; }
     button { padding: 8px 15px; margin-left: 10px; }
     #result { margin-top: 20px; font-size: 18px; }
+    #map { height: 400px; width: 100%; margin-top: 20px; }
   </style>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 </head>
 <body>
   <h1>Suivi de position</h1>
@@ -16,8 +21,12 @@
   <button onclick="getLocation()">Voir la position</button>
 
   <div id="result"></div>
+  <div id="map"></div>
 
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script>
+    let map, marker;
+
     async function getLocation() {
       const email = document.getElementById('emailInput').value;
       const resultDiv = document.getElementById('result');
@@ -28,6 +37,7 @@
         const data = await response.json();
         if (data.latitude && data.longitude) {
           resultDiv.innerHTML = `Latitude : ${data.latitude}<br>Longitude : ${data.longitude}<br>Heure : ${data.heure}`;
+          showMap(data.latitude, data.longitude);
         } else {
           resultDiv.innerHTML = data.error || 'Aucune donnée trouvée.';
         }
@@ -35,9 +45,25 @@
         resultDiv.innerHTML = 'Erreur lors de la récupération.';
       }
     }
+
+    function showMap(lat, lng) {
+      if (!map) {
+        map = L.map('map').setView([lat, lng], 16);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 19
+        }).addTo(map);
+        marker = L.marker([lat, lng], {icon: L.icon({iconUrl: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png', iconSize: [32, 32]})}).addTo(map);
+      } else {
+        map.setView([lat, lng], 16);
+        marker.setLatLng([lat, lng]);
+      }
+    }
   </script>
 </body>
 </html> -->
+
+
+
 
 
 
