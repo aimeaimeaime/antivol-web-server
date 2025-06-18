@@ -79,35 +79,20 @@
 
 
 
+
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
   <title>Suivi de position en direct</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 20px;
-    }
-    input {
-      padding: 8px;
-      width: 300px;
-    }
-    button {
-      padding: 8px 15px;
-      margin-left: 10px;
-    }
-    #result {
-      margin-top: 20px;
-      font-size: 18px;
-    }
-    #map {
-      width: 100%;
-      height: 400px;
-      margin-top: 20px;
-      display: none;
-    }
+    body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+    input { padding: 8px; width: 250px; }
+    button { padding: 8px 15px; margin-left: 10px; }
+    #result { margin-top: 20px; font-size: 16px; }
+    #map { height: 400px; margin-top: 20px; }
   </style>
 </head>
 <body>
@@ -118,16 +103,14 @@
   <div id="result"></div>
   <div id="map"></div>
 
-  <!-- Script Google Maps -->
-  <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY"></script>
-
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script>
+    let map, marker;
+
     async function getLocation() {
       const email = document.getElementById('emailInput').value;
       const resultDiv = document.getElementById('result');
-      const mapDiv = document.getElementById('map');
       resultDiv.innerHTML = 'Chargement...';
-      mapDiv.style.display = 'none';
 
       try {
         const response = await fetch(`/location/${encodeURIComponent(email)}`);
@@ -140,21 +123,20 @@
             Heure : ${data.heure}
           `;
 
-          // Affichage carte
-          mapDiv.style.display = 'block';
-          const location = { lat: parseFloat(data.latitude), lng: parseFloat(data.longitude) };
+          const lat = parseFloat(data.latitude);
+          const lon = parseFloat(data.longitude);
 
-          const map = new google.maps.Map(mapDiv, {
-            zoom: 20,
-            center: location,
-            mapTypeId: 'satellite'
-          });
-
-          new google.maps.Marker({
-            position: location,
-            map: map,
-            title: "Dernière position"
-          });
+          if (!map) {
+            map = L.map('map').setView([lat, lon], 18); // Zoom 18 = très proche
+            L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
+              maxZoom: 22,
+              attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+            marker = L.marker([lat, lon]).addTo(map);
+          } else {
+            map.setView([lat, lon], 18);
+            marker.setLatLng([lat, lon]);
+          }
 
         } else {
           resultDiv.innerHTML = data.error || 'Aucune donnée trouvée.';
