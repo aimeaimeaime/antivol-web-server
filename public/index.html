@@ -1,93 +1,5 @@
 
-
 <!-- 
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8">
-  <title>Localisation Antivol</title>
-  <style>
-    body { font-family: Arial, sans-serif; text-align: center; padding: 40px; }
-    input { padding: 8px; width: 250px; }
-    button { padding: 8px 15px; margin-left: 10px; }
-    #result { margin-top: 20px; font-size: 18px; }
-    #map { height: 400px; width: 100%; margin-top: 20px; }
-  </style>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-</head>
-<body>
-  <h1>Suivi de position</h1>
-  <input type="email" id="emailInput" placeholder="Entrez l'email de l'utilisateur">
-  <button onclick="getLocation()">Voir la position</button>
-
-  <div id="result"></div>
-  <div id="map"></div>
-
-  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-  <script>
-    let map, marker;
-
-    async function getLocation() {
-      const email = document.getElementById('emailInput').value;
-      const resultDiv = document.getElementById('result');
-      resultDiv.innerHTML = 'Chargement...';
-
-      try {
-        const response = await fetch(`/location/${encodeURIComponent(email)}`);
-        const data = await response.json();
-        if (data.latitude && data.longitude) {
-          resultDiv.innerHTML = `Latitude : ${data.latitude}<br>Longitude : ${data.longitude}<br>Heure : ${data.heure}`;
-          showMap(data.latitude, data.longitude);
-        } else {
-          resultDiv.innerHTML = data.error || 'Aucune donnée trouvée.';
-        }
-      } catch (error) {
-        resultDiv.innerHTML = 'Erreur lors de la récupération.';
-      }
-    }
-
-    function showMap(lat, lng) {
-      if (!map) {
-        map = L.map('map').setView([lat, lng], 16);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          maxZoom: 19
-        }).addTo(map);
-        marker = L.marker([lat, lng], {icon: L.icon({iconUrl: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png', iconSize: [32, 32]})}).addTo(map);
-      } else {
-        map.setView([lat, lng], 16);
-        marker.setLatLng([lat, lng]);
-      }
-    }
-  </script>
-</body>
-</html> -->
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 <!DOCTYPE html>
 <html lang="fr">
@@ -160,6 +72,209 @@
 
       } catch (error) {
         resultDiv.innerHTML = 'Erreur lors de la récupération.';
+      }
+    }
+  </script>
+</body>
+</html> -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Suivi de position en direct</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <style>
+    /* Arrière-plan animé galaxie */
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #ffffff;
+      background: linear-gradient(-45deg, #1a2a6c, #b21f1f, #fdbb2d, #0f2027);
+      background-size: 400% 400%;
+      animation: galaxy 15s ease infinite;
+      overflow-x: hidden;
+    }
+
+    @keyframes galaxy {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    h1 {
+      margin-top: 40px;
+      font-size: 2.5em;
+      text-shadow: 2px 2px 5px #000;
+    }
+
+    #top-left, #top-right {
+      position: absolute;
+      padding: 10px;
+      max-width: 300px;
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 10px;
+    }
+
+    #top-left {
+      top: 20px;
+      left: 20px;
+      text-align: left;
+      font-size: 15px;
+    }
+
+    #top-right {
+      top: 20px;
+      right: 20px;
+      text-align: right;
+      font-size: 14px;
+      font-style: italic;
+      line-height: 1.6;
+    }
+
+    input {
+      padding: 10px;
+      width: 300px;
+      border: none;
+      border-radius: 20px;
+      outline: none;
+      margin-right: 10px;
+    }
+
+    button {
+      padding: 10px 15px;
+      border: none;
+      background-color: #ffffff;
+      color: #333;
+      font-weight: bold;
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 2px 2px 5px rgba(0,0,0,0.4);
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background-color: #f1c40f;
+      color: #000;
+    }
+
+    #googleLink {
+      margin-top: 20px;
+      display: inline-block;
+      font-size: 18px;
+      color: #00d4ff;
+      text-decoration: none;
+      font-weight: bold;
+      text-shadow: 1px 1px 3px #000;
+    }
+
+    #googleLink:hover {
+      color: #f1c40f;
+    }
+
+    #map {
+      height: 400px;
+      margin: 30px auto 0;
+      width: 90%;
+      border: 3px solid #ffffff44;
+      border-radius: 10px;
+    }
+
+    #center-content {
+      text-align: center;
+      margin-top: 100px;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="top-left" id="result">
+    <!-- Coordonnées GPS ici -->
+  </div>
+
+  <div id="top-right">
+    Cette application a été conçue par <strong>Aimé</strong>.<br>
+    Développeur Salesforce, Web & Mobile passionné.<br>
+    Il crée des sites web professionnels et<br>
+    des applications sur mesure pour vous.
+  </div>
+
+  <div id="center-content">
+    <h1>Suivi de position en direct</h1>
+    <input type="email" id="emailInput" placeholder="Entrez l'email de l'utilisateur">
+    <button onclick="getLocation()">➤</button>
+    <div>
+      <a id="googleLink" href="#" target="_blank" style="display:none;">Voir sur Google Maps</a>
+    </div>
+  </div>
+
+  <div id="map"></div>
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script>
+    let map, marker;
+
+    async function getLocation() {
+      const email = document.getElementById('emailInput').value;
+      const topLeftDiv = document.getElementById('top-left');
+      const linkEl = document.getElementById('googleLink');
+      topLeftDiv.innerHTML = 'Chargement...';
+      linkEl.style.display = 'none';
+
+      try {
+        const response = await fetch(`/location/${encodeURIComponent(email)}`);
+        const data = await response.json();
+
+        if (data.latitude && data.longitude) {
+          const lat = parseFloat(data.latitude);
+          const lon = parseFloat(data.longitude);
+
+          topLeftDiv.innerHTML = `
+            📍 <strong>Latitude</strong> : ${lat}<br>
+            📍 <strong>Longitude</strong> : ${lon}<br>
+            🕒 <strong>Heure</strong> : ${data.heure}
+          `;
+
+          linkEl.href = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}`;
+          linkEl.style.display = 'inline-block';
+
+          if (!map) {
+            map = L.map('map').setView([lat, lon], 18);
+            L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
+              maxZoom: 22,
+              attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+            marker = L.marker([lat, lon]).addTo(map);
+          } else {
+            map.setView([lat, lon], 18);
+            marker.setLatLng([lat, lon]);
+          }
+
+        } else {
+          topLeftDiv.innerHTML = data.error || '❌ Aucune donnée trouvée.';
+        }
+
+      } catch (error) {
+        topLeftDiv.innerHTML = '❌ Erreur lors de la récupération.';
       }
     }
   </script>
