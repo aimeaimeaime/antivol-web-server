@@ -77,31 +77,58 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
   <title>Localisation Antivol</title>
   <style>
-    body { font-family: Arial, sans-serif; text-align: center; padding: 40px; }
-    input { padding: 8px; width: 250px; }
-    button { padding: 8px 15px; margin-left: 10px; }
-    #result { margin-top: 20px; font-size: 18px; }
-    #map { height: 400px; width: 100%; margin-top: 20px; }
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    #map {
+      height: 400px;
+      width: 100%;
+      margin-top: 20px;
+    }
+    input {
+      padding: 8px;
+      width: 250px;
+    }
+    button {
+      padding: 8px 15px;
+      margin-left: 10px;
+    }
+    #result {
+      margin-top: 20px;
+      font-size: 18px;
+    }
   </style>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
+    integrity="sha512-sA+z0pK7mxq5B1VqpvRMid9ajd5Am5aQ5xj5pO2xgDr/fyW+7OKAq/XINZoO4AsAY8Kfuz0a1R0ZsUeoxbKsUg=="
+    crossorigin=""
+  />
 </head>
 <body>
-  <h1>Suivi de position</h1>
+  <h1>Suivi de position en direct</h1>
   <input type="email" id="emailInput" placeholder="Entrez l'email de l'utilisateur">
   <button onclick="getLocation()">Voir la position</button>
 
   <div id="result"></div>
   <div id="map"></div>
 
-  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"
+    integrity="sha512-bYKnZ1i9Q+aj9FdcP+2w4RQnQ5WDDprQwkaDdB1n4J2L6Vq1xkUN5OEPL2nvCGeWrQq3b+0jx8ygfFJjUB6Zow=="
+    crossorigin=""></script>
+
   <script>
-    let map, marker;
+    let map;
+    let marker;
 
     async function getLocation() {
       const email = document.getElementById('emailInput').value;
@@ -111,27 +138,34 @@
       try {
         const response = await fetch(`/location/${encodeURIComponent(email)}`);
         const data = await response.json();
+
         if (data.latitude && data.longitude) {
-          resultDiv.innerHTML = `Latitude : ${data.latitude}<br>Longitude : ${data.longitude}<br>Heure : ${data.heure}`;
-          showMap(data.latitude, data.longitude);
+          resultDiv.innerHTML = `
+            Latitude : ${data.latitude}<br>
+            Longitude : ${data.longitude}<br>
+            Heure : ${data.heure}
+          `;
+
+          if (!map) {
+            map = L.map('map').setView([data.latitude, data.longitude], 20);
+
+            L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', {
+              maxZoom: 25,
+              minZoom: 1,
+              subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+              attribution: '© Google Maps'
+            }).addTo(map);
+
+            marker = L.marker([data.latitude, data.longitude]).addTo(map);
+          } else {
+            map.setView([data.latitude, data.longitude], 20);
+            marker.setLatLng([data.latitude, data.longitude]);
+          }
         } else {
           resultDiv.innerHTML = data.error || 'Aucune donnée trouvée.';
         }
       } catch (error) {
         resultDiv.innerHTML = 'Erreur lors de la récupération.';
-      }
-    }
-
-    function showMap(lat, lng) {
-      if (!map) {
-        map = L.map('map').setView([lat, lng], 16);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          maxZoom: 19
-        }).addTo(map);
-        marker = L.marker([lat, lng], {icon: L.icon({iconUrl: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png', iconSize: [32, 32]})}).addTo(map);
-      } else {
-        map.setView([lat, lng], 16);
-        marker.setLatLng([lat, lng]);
       }
     }
   </script>
