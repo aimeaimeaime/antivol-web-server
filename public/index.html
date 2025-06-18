@@ -1,42 +1,39 @@
-
-// Fichier: public/index.html
 <!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Système Antivol Web</title>
+  <title>Localisation Antivol</title>
   <style>
-    body { font-family: Arial; text-align: center; margin-top: 50px; }
-    input { padding: 10px; width: 300px; }
-    button { padding: 10px; }
-    .result { margin-top: 30px; font-size: 18px; }
+    body { font-family: Arial, sans-serif; text-align: center; padding: 40px; }
+    input { padding: 8px; width: 250px; }
+    button { padding: 8px 15px; margin-left: 10px; }
+    #result { margin-top: 20px; font-size: 18px; }
   </style>
 </head>
 <body>
-  <h2>Localisation de l'utilisateur</h2>
-  <input type="text" id="email" placeholder="Entrez l'adresse email" />
-  <button onclick="fetchLocation()">Voir la position</button>
-  <div class="result" id="result"></div>
+  <h1>Suivi de position</h1>
+  <input type="email" id="emailInput" placeholder="Entrez l'email de l'utilisateur">
+  <button onclick="getLocation()">Voir la position</button>
+
+  <div id="result"></div>
 
   <script>
-    function fetchLocation() {
-      const email = document.getElementById("email").value.trim();
-      if (!email) return alert("Veuillez entrer un email");
+    async function getLocation() {
+      const email = document.getElementById('emailInput').value;
+      const resultDiv = document.getElementById('result');
+      resultDiv.innerHTML = 'Chargement...';
 
-      fetch(`/location?email=${encodeURIComponent(email)}`)
-        .then(res => res.json())
-        .then(data => {
-          if (data.error) {
-            document.getElementById("result").innerText = data.error;
-          } else {
-            document.getElementById("result").innerHTML =
-              `Latitude: ${data.latitude}<br>Longitude: ${data.longitude}<br>Heure: ${data.heure}`;
-          }
-        })
-        .catch(err => {
-          document.getElementById("result").innerText = "Erreur de connexion";
-        });
+      try {
+        const response = await fetch(`/location/${encodeURIComponent(email)}`);
+        const data = await response.json();
+        if (data.latitude && data.longitude) {
+          resultDiv.innerHTML = `Latitude : ${data.latitude}<br>Longitude : ${data.longitude}<br>Heure : ${data.heure}`;
+        } else {
+          resultDiv.innerHTML = data.error || 'Aucune donnée trouvée.';
+        }
+      } catch (error) {
+        resultDiv.innerHTML = 'Erreur lors de la récupération.';
+      }
     }
   </script>
 </body>

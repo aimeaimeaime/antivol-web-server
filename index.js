@@ -1,17 +1,34 @@
-// Fichier: index.js
-const express = require("express");
-const cors = require("cors");
-const dotenv = require("dotenv");
-const path = require("path");
-const app = express();
+/// index.js
+const express = require('express');
+const cors = require('cors');
+const { db, ref, onValue } = require('./firebase');
+const path = require('path');
 
-dotenv.config();
+const app = express();
+const PORT = process.env.PORT || 10000;
 
 app.use(cors());
-app.use(express.static(path.join(__dirname, "public")));
-app.use("/location", require("./routes/location"));
+app.use(express.static('public'));
 
-const PORT = process.env.PORT || 3000;
+app.get('/location/:email', (req, res) => {
+  const rawEmail = req.params.email;
+  const emailKey = rawEmail.replace(/\./g, '_');
+
+  const userRef = ref(db, `localisation/${emailKey}`);
+
+  onValue(userRef, (snapshot) => {
+    const data = snapshot.val();
+    if (data) {
+      const latest = Object.values(data).pop();
+      res.json(latest);
+    } else {
+      res.status(404).json({ error: 'Aucune position trouvée pour cet utilisateur.' });
+    }
+  }, {
+    onlyOnce: true
+  });
+});
+
 app.listen(PORT, () => {
   console.log(`Serveur en ligne sur le port ${PORT}`);
 });

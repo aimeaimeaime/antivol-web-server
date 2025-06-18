@@ -1,13 +1,12 @@
-// Fichier: firebase.js
-const admin = require("firebase-admin");
-const { initializeApp, applicationDefault } = require("firebase-admin/app");
-const { getDatabase } = require("firebase-admin/database");
-require("dotenv").config();
+/// firebase.js
+const { initializeApp } = require('firebase/app');
+const { getDatabase, ref, onValue } = require('firebase/database');
 
-initializeApp({
-  credential: applicationDefault(),
-  databaseURL: process.env.FIREBASE_DB_URL,
-});
+const firebaseConfig = {
+  databaseURL: 'https://systemeantivol-4bcbf-default-rtdb.firebaseio.com'
+};
 
-const db = getDatabase();
-module.exports = db;
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+module.exports = { db, ref, onValue };
